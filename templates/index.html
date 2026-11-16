@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScamShield NG</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:640px;margin:2rem auto;padding:0 1rem;color:#1a1a1a}
+textarea{width:100%;height:130px;padding:.7rem;font-size:1rem;border:1px solid #bbb;border-radius:8px;box-sizing:border-box}
+button{padding:.7rem 1.2rem;font-size:1rem;border:0;border-radius:8px;background:#0a7a3d;color:#fff;cursor:pointer}
+select{padding:.6rem;border-radius:8px}
+.box{margin-top:1.2rem;padding:1rem;border-radius:8px;border:1px solid #ddd}
+.HIGH{background:#fde8e8}.MEDIUM{background:#fff4d6}.LOW{background:#e6f6ec}
+small{color:#666}
+</style></head><body>
+<h1>ScamShield NG</h1>
+<p>Paste a suspicious SMS or WhatsApp message. We score the risk and explain why.</p>
+<textarea id="t" placeholder="Paste message here..."></textarea><br><br>
+<select id="l"><option value="english">English</option><option value="pidgin">Pidgin</option></select>
+<button onclick="go()">Check message</button>
+<div id="out"></div>
+<p><small>Not a guarantee. When unsure, call your bank using the number on your card. Never share OTP or PIN.</small></p>
+<script>
+async function go(){
+  const out=document.getElementById('out'); out.innerHTML='Checking...';
+  const r=await fetch('/check',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text:t.value,lang:l.value})});
+  const d=await r.json();
+  if(d.error){out.textContent=d.error;return}
+  out.innerHTML=`<div class="box ${d.level}"><h2>${d.level} risk (${Math.round(d.score*100)}%)</h2>
+  <ul>${d.flags.map(f=>`<li>${f}</li>`).join('')}</ul><p>${d.explanation}</p></div>`;
+}
+</script></body></html>
